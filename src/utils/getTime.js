@@ -4,6 +4,8 @@ import { SpaCandle } from "@icon-park/vue-next";
 // 时钟
 export const getCurrentTime = () => {
   let time = new Date();
+  // 设置时区为北京时间（东八区）
+  time.setHours(time.getHours() + 8);
   let year = time.getFullYear();
   let month = time.getMonth() + 1 < 10 ? "0" + (time.getMonth() + 1) : time.getMonth() + 1;
   let day = time.getDate() < 10 ? "0" + time.getDate() : time.getDate();
@@ -25,27 +27,31 @@ export const getCurrentTime = () => {
 
 // 时光胶囊
 export const getTimeCapsule = () => {
+  // 设置时区为北京时间（东八区）
+  const time = new Date();
+  time.setHours(time.getHours() + 8);
+
   // 日进度
-  const todayStartDate = new Date(new Date().toLocaleDateString()).getTime();
-  const todayPassHours = (new Date() - todayStartDate) / 1000 / 60 / 60;
+  const todayStartDate = new Date(new Date(time.toLocaleDateString()).getTime());
+  const todayPassHours = (time - todayStartDate) / 1000 / 60 / 60;
   const todayPassHoursPercent = (todayPassHours / 24) * 100;
 
   // 周进度
   const weeks = [7, 1, 2, 3, 4, 5, 6];
-  const weekDay = weeks[new Date().getDay()];
+  const weekDay = weeks[time.getDay()];
   const weekDayPassPercent = (weekDay / 7) * 100;
 
   // 月进度
-  const year = new Date().getFullYear();
-  const date = new Date().getDate();
-  const month = new Date().getMonth() + 1;
+  const year = time.getFullYear();
+  const date = time.getDate();
+  const month = time.getMonth() + 1;
   const monthAll = new Date(year, month, 0).getDate();
   const monthPassPercent = (date / monthAll) * 100;
 
   // 年进度
   const yearStartDate = new Date(year, 0, 1).getTime();
   const yearEndDate = new Date(year + 1, 0, 1).getTime();
-  const yearPassHours = (new Date() - yearStartDate) / 1000 / 60 / 60;
+  const yearPassHours = (time - yearStartDate) / 1000 / 60 / 60;
   const yearTotalHours = (yearEndDate - yearStartDate) / 1000 / 60 / 60;
   const yearPassPercent = (yearPassHours / yearTotalHours) * 100;
 
@@ -69,9 +75,10 @@ export const getTimeCapsule = () => {
   };
 };
 
+
 // 欢迎提示
 export const helloInit = () => {
-  const hour = new Date().getHours();
+  const hour = new Date().getHours()+8;
   let hello = null;
   if (hour < 6) {
     hello = "凌晨好";
@@ -141,3 +148,33 @@ export const siteDateStatistics = (startDate) => {
     return `本站已经苟活了 ${Math.round(differenceInDays)} 天`;
   }
 };
+//剩余时间计算
+export const timeRemaining = (targetTime) => {
+  const target = targetTime.split(":").map(Number);
+  const currentTime = new Date();
+  currentTime.setHours(currentTime.getHours() + 8);
+  const targetDate = new Date(currentTime);
+  targetDate.setHours(target[0]);
+  targetDate.setMinutes(target[1]);
+  targetDate.setSeconds(target[2]);
+  
+  let remaining = targetDate - currentTime;
+  if (remaining < 0) {
+    // 如果目标时间已经过了今天，则将目标时间设为明天的同一时刻
+    targetDate.setDate(targetDate.getDate() + 1);
+    remaining = targetDate - currentTime;
+  }
+
+  const hours = Math.floor(remaining / (1000 * 60 * 60));
+  remaining %= (1000 * 60 * 60);
+  const minutes = Math.floor(remaining / (1000 * 60));
+  remaining %= (1000 * 60);
+  const seconds = Math.floor(remaining / 1000);
+
+  return {
+    hour: hours < 10 ? "0" + hours : hours,
+    minute: minutes < 10 ? "0" + minutes : minutes,
+    second: seconds < 10 ? "0" + seconds : seconds
+  };
+};
+

@@ -4,6 +4,10 @@
       <hourglass-full theme="two-tone" size="24" :fill="['#efefef', '#00000020']" />
       <span>时光胶囊</span>
     </div>
+    <span class="text">下班倒计时</span>
+    <div class="timeText">
+      <span> {{ remainingTime.hour }}:{{ remainingTime.minute }}:{{ remainingTime.second }}</span>
+    </div>
     <span class="text">今日已经度过了&nbsp;{{ timeData.day.elapsed }}&nbsp;小时</span>
     <el-progress :text-inside="true" :stroke-width="20" :percentage="timeData.day.pass" />
     <span class="text">本周已经度过了&nbsp;{{ timeData.week.elapsed }}&nbsp;天</span>
@@ -27,7 +31,7 @@
 
 <script setup>
 import { HourglassFull } from "@icon-park/vue-next";
-import { getTimeCapsule, siteDateStatistics } from "@/utils/getTime.js";
+import { getTimeCapsule, siteDateStatistics, timeRemaining } from "@/utils/getTime.js";
 import { mainStore } from "@/store";
 const store = mainStore();
 
@@ -36,10 +40,17 @@ const timeData = ref(getTimeCapsule());
 const startDate = ref(import.meta.env.VITE_SITE_START);
 const startDateText = ref(null);
 const timeInterval = ref(null);
-
+// 剩余时间
+const remainingTime = ref({});
+// 更新时间
+const getTimeRemaining = () => {
+  remainingTime.value = timeRemaining('18:30:00');
+};
 onMounted(() => {
+  remainingTime.value = getTimeRemaining();
   timeInterval.value = setInterval(() => {
     timeData.value = getTimeCapsule();
+    getTimeRemaining();
     if (startDate.value) startDateText.value = siteDateStatistics(new Date(startDate.value));
   }, 1000);
 });
@@ -52,12 +63,14 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .time-capsule {
   width: 100%;
+
   .title {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin: 0.2rem 0 1.5rem;
     font-size: 1.1rem;
+
     .i-icon {
       display: flex;
       justify-content: center;
@@ -65,10 +78,18 @@ onBeforeUnmount(() => {
       margin-right: 6px;
     }
   }
+
   .text {
     display: block;
     margin: 1rem 0rem 0.5rem 0rem;
     font-size: 0.95rem;
+  }
+
+  .timeText {
+    margin-top: 10px;
+    font-size: 3.25rem;
+    letter-spacing: 2px;
+    font-family: "UnidreamLED";
   }
 }
 </style>
